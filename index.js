@@ -1,8 +1,8 @@
+require('dotenv').config()
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const { config } = require('localforage');
+
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -27,7 +27,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+   
 
     const coffeeCollection = client.db('DBCOFFEE').collection('CoffeeHouse')
 
@@ -49,6 +49,27 @@ async function run() {
       const newCoffee = req.body;
       console.log(newCoffee);
       const result = await coffeeCollection.insertOne(newCoffee);
+      res.send(result)
+    })
+
+    app.put('/coffee/:id', async(req, res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)};
+      const options = { upsert: true };
+      const updatedCoffee = req.body;
+      const Coffee = {
+        $set : {
+          coffeeName: updatedCoffee.coffeeName,
+           supplierName: updatedCoffee.supplierName,
+           quantity: updatedCoffee.quantity,
+            Testy: updatedCoffee.Testy,
+             category: updatedCoffee.category,
+              details: updatedCoffee.details,
+               url : updatedCoffee.url
+        }
+      }
+      const result = await coffeeCollection.updateOne(filter, Coffee, options)
+
       res.send(result)
     })
 
